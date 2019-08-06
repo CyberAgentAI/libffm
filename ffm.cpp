@@ -352,7 +352,7 @@ shared_ptr<ffm_model> train(ffm_problem *tr, vector<ffm_int> &order,
   if (param.json_meta_path != nullptr) {
     ofstream f_out(param.json_meta_path);
     if (f_out.is_open()) {
-      f_out << "{\"best_iteration\": " << best_iteration << "}\n" << flush;
+      f_out << "{\"best_iteration\": " << best_iteration << ", \"best_va_loss\": " << best_va_loss << "}\n" << flush;
       f_out.close();
     }
   }

@@ -9,3 +9,6 @@ ffm-train
 build/
 data/
 model/
+
+*.sqlite3
+venv/
