@@ -11,6 +11,7 @@ def get_meta_path(trial_number: int):
 def objective(trial: optuna.Trial):
     lmd = trial.suggest_loguniform("lambda", 1e-6, 1)
     eta = trial.suggest_loguniform("eta", 1e-6, 1)
+    latent = trial.suggest_int("latent", 1, 8)
     json_meta_path = get_meta_path(trial.number)
 
     commands = [
@@ -19,7 +20,7 @@ def objective(trial: optuna.Trial):
         "--auto-stop", "--auto-stop-threshold", "3",
         "-l", str(lmd),
         "-r", str(eta),
-        "-k", "4",
+        "-k", str(latent),
         "-t", str(500),
         "--json-meta", json_meta_path,
         "./data/train2.txt",
@@ -51,7 +52,8 @@ def objective(trial: optuna.Trial):
 
 
 def main():
-    study = optuna.load_study(study_name="dynalyst-ffm", storage="sqlite:///db.sqlite3")
+    sampler = optuna.integration.SkoptSampler()
+    study = optuna.load_study(study_name="dynalyst-ffm-gp", storage="sqlite:///db.sqlite3", sampler=sampler)
     study.optimize(
         objective,
         n_trials=1024,
