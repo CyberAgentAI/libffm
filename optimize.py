@@ -9,9 +9,8 @@ def get_meta_path(trial_number: int):
 
 
 def objective(trial: optuna.Trial):
-    lmd = trial.suggest_loguniform("lambda", 1e-6, 10)
-    eta = trial.suggest_loguniform("eta", 1e-6, 10)
-    factor = trial.suggest_int("factor", 1, 8)
+    lmd = trial.suggest_loguniform("lambda", 1e-6, 1)
+    eta = trial.suggest_loguniform("eta", 1e-6, 1)
     json_meta_path = get_meta_path(trial.number)
 
     commands = [
@@ -20,7 +19,7 @@ def objective(trial: optuna.Trial):
         "--auto-stop", "--auto-stop-threshold", "3",
         "-l", str(lmd),
         "-r", str(eta),
-        "-k", str(factor),
+        "-k", "4",
         "-t", str(500),
         "--json-meta", json_meta_path,
         "./data/train2.txt",
@@ -42,7 +41,7 @@ def objective(trial: optuna.Trial):
     with open(json_meta_path) as f:
         json_dict = json.load(f)
         best_iteration = json_dict.get('best_iteration')
-        best_va_loss = json_dict.get('best_iteration')
+        best_va_loss = json_dict.get('best_va_loss')
 
     if best_iteration is None or best_va_loss is None:
         raise ValueError("failed to open json meta")
