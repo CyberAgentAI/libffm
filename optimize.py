@@ -11,7 +11,6 @@ def get_meta_path(trial_number: int):
 def objective(trial: optuna.Trial):
     lmd = trial.suggest_loguniform("lambda", 1e-6, 1)
     eta = trial.suggest_loguniform("eta", 1e-6, 1)
-    latent = trial.suggest_int("latent", 1, 8)
     json_meta_path = get_meta_path(trial.number)
 
     commands = [
@@ -20,7 +19,7 @@ def objective(trial: optuna.Trial):
         "--auto-stop", "--auto-stop-threshold", "3",
         "-l", str(lmd),
         "-r", str(eta),
-        "-k", str(latent),
+        "-k", "4",
         "-t", str(500),
         "--json-meta", json_meta_path,
         "./data/train2.txt",
@@ -33,10 +32,6 @@ def objective(trial: optuna.Trial):
         encoding='utf-8')
 
     trial.set_user_attr("args", result.args)
-    trial.set_user_attr("return_code", result.returncode)
-    trial.set_user_attr("stdout", result.stdout)
-    trial.set_user_attr("stderr", result.stderr)
-
     best_iteration = None
     best_va_loss = None
     with open(json_meta_path) as f:
@@ -52,12 +47,18 @@ def objective(trial: optuna.Trial):
 
 
 def main():
+    storage = optuna.storages.RDBStorage(
+        "sqlite:///db.sqlite3",
+        engine_kwargs={"pool_size": 1})
     sampler = optuna.integration.SkoptSampler()
-    study = optuna.load_study(study_name="dynalyst-ffm-gp", storage="sqlite:///db.sqlite3", sampler=sampler)
+    study = optuna.load_study(
+        study_name="dynalyst-ffm-gp",
+        storage=storage,
+        sampler=sampler)
     study.optimize(
         objective,
-        n_trials=1024,
-        n_jobs=multiprocessing.cpu_count(),
+        n_trials=256,
+        n_jobs=multiprocessing.cpu_count() - 1,
         catch=())
     print("best_trial", study.best_trial.number)
     print("best_params", study.best_params)
