@@ -26,7 +26,7 @@ def make_extensions():
 
 setup(
     name="ffm",
-    version="0.4.0",
+    version="0.4.1",
     description="LibFFM Python Package",
     long_description="LibFFM Python Package",
     install_requires=["numpy"],
